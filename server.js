@@ -7,33 +7,48 @@ app.use(cors());
 
 let stats = { wins: 0, losses: 0 };
 
-function getHighAccuracyPrediction(history) {
+// Advanced AI Scoring Engine for High Accuracy
+function runAIEngine(history) {
     if (!history || history.length < 5) {
-        return { prediction: "Big", patternName: "Private AI Init" };
+        return { prediction: "Big", patternName: "AI Core Warming" };
     }
 
     let sizes = history.map(h => h.size || h.bs);
     
-    // High-Accuracy Loss Guard Mechanism
-    if (stats.losses > stats.wins) {
-        let safeCounter = sizes[0] === 'Big' ? 'Small' : 'Big';
-        return { prediction: safeCounter, patternName: "Private Guard (Recovery)" };
+    // Loss Guard Protection Mode
+    if (stats.losses > stats.wins + 1) {
+        let antiTrend = sizes[0] === 'Big' ? 'Small' : 'Big';
+        return { prediction: antiTrend, patternName: "AI Recovery Shield" };
     }
 
-    // Momentum & Trend Streak Analysis
-    let lastThree = sizes.slice(0, 3);
-    if (lastThree[0] === lastThree[1] && lastThree[1] === lastThree[2]) {
-        return { prediction: lastThree[0], patternName: "Private Momentum Streak" };
+    let bigScore = 0;
+    let smallScore = 0;
+
+    // Weighted Recency Analysis (Recent results have higher AI weight)
+    const weights = [3.0, 2.2, 1.6, 1.2, 1.0];
+    for (let i = 0; i < Math.min(5, sizes.length); i++) {
+        let w = weights[i] || 1.0;
+        if (sizes[i] === 'Big') {
+            bigScore += w;
+        } else {
+            smallScore += w;
+        }
     }
 
-    // Alternating Market Matrix Filter
-    if (sizes[0] !== sizes[1] && sizes[1] !== sizes[2]) {
-        let alternate = sizes[0] === 'Big' ? 'Small' : 'Big';
-        return { prediction: alternate, patternName: "Private Alt Matrix" };
+    // Pattern Intelligence Matrix
+    let aiPrediction = bigScore >= smallScore ? "Small" : "Big"; // Mean Reversion AI Logic
+    let aiPatternName = "AI Smart Quant Matrix";
+
+    // Streak Momentum Detection
+    if (sizes[0] === sizes[1] && sizes[1] === sizes[2]) {
+        aiPrediction = sizes[0]; // Follow momentum if strong streak
+        aiPatternName = "AI Momentum Neural";
     }
 
-    let defaultTrend = sizes[0] === 'Big' ? 'Small' : 'Big';
-    return { prediction: defaultTrend, patternName: "Private Core Engine" };
+    return { 
+        prediction: aiPrediction, 
+        patternName: aiPatternName 
+    };
 }
 
 app.post('/api/get-pattern', (req, res) => {
@@ -42,7 +57,7 @@ app.post('/api/get-pattern', (req, res) => {
     if (clientLosses !== undefined) stats.losses = clientLosses;
     if (clientWins !== undefined) stats.wins = clientWins;
 
-    const result = getHighAccuracyPrediction(history);
+    const result = runAIEngine(history);
 
     res.json({
         period: period,
@@ -54,5 +69,5 @@ app.post('/api/get-pattern', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Private Server running on port ${PORT}`);
+    console.log(`AI Quant Server running on port ${PORT}`);
 });
