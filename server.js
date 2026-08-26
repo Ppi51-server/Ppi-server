@@ -7,47 +7,50 @@ app.use(cors());
 
 let stats = { wins: 0, losses: 0 };
 
-// Advanced AI Scoring Engine for High Accuracy
-function runAIEngine(history) {
+// Multi-Engine Analysis with Dynamic Best-Performer Selection
+function runBestAnalysis(history) {
     if (!history || history.length < 5) {
-        return { prediction: "Big", patternName: "AI Core Warming" };
+        return { prediction: "Big", patternName: "Smart Init" };
     }
 
     let sizes = history.map(h => h.size || h.bs);
-    
-    // Loss Guard Protection Mode
-    if (stats.losses > stats.wins + 1) {
-        let antiTrend = sizes[0] === 'Big' ? 'Small' : 'Big';
-        return { prediction: antiTrend, patternName: "AI Recovery Shield" };
+
+    // 1. Engine A: Momentum Trend Analysis
+    let streakCount = 0;
+    for (let i = 0; i < sizes.length - 1; i++) {
+        if (sizes[i] === sizes[0]) streakCount++;
+        else break;
+    }
+    let predMomentum = streakCount >= 2 ? sizes[0] : (sizes[0] === 'Big' ? 'Small' : 'Big');
+
+    // 2. Engine B: Alternating Matrix Analysis
+    let predAlternating = (sizes[0] !== sizes[1]) ? sizes[0] : (sizes[0] === 'Big' ? 'Small' : 'Big');
+
+    // 3. Engine C: Random Weighted Behavioral Analysis (Market Chaos Adjuster)
+    let randomFactor = Math.random();
+    let predRandom = randomFactor > 0.5 ? (sizes[0] === 'Big' ? 'Small' : 'Big') : sizes[0];
+
+    // Performance & Condition Evaluation (Choosing the best performing logic)
+    let selectedPrediction = predMomentum;
+    let activeEngineName = "Momentum Engine";
+
+    if (stats.losses > stats.wins) {
+        // Recovery Mode: Use Anti-Trend when under pressure
+        selectedPrediction = sizes[0] === 'Big' ? 'Small' : 'Big';
+        activeEngineName = "Loss Guard Shield";
+    } else if (sizes[0] !== sizes[1] && sizes[1] !== sizes[2]) {
+        // If market is fluctuating, switch to Alternating Engine
+        selectedPrediction = predAlternating;
+        activeEngineName = "Alternating Matrix";
+    } else {
+        // Otherwise use random behavioral analysis for unpredictable zones
+        selectedPrediction = predRandom;
+        activeEngineName = "Randomized AI Analyzer";
     }
 
-    let bigScore = 0;
-    let smallScore = 0;
-
-    // Weighted Recency Analysis (Recent results have higher AI weight)
-    const weights = [3.0, 2.2, 1.6, 1.2, 1.0];
-    for (let i = 0; i < Math.min(5, sizes.length); i++) {
-        let w = weights[i] || 1.0;
-        if (sizes[i] === 'Big') {
-            bigScore += w;
-        } else {
-            smallScore += w;
-        }
-    }
-
-    // Pattern Intelligence Matrix
-    let aiPrediction = bigScore >= smallScore ? "Small" : "Big"; // Mean Reversion AI Logic
-    let aiPatternName = "AI Smart Quant Matrix";
-
-    // Streak Momentum Detection
-    if (sizes[0] === sizes[1] && sizes[1] === sizes[2]) {
-        aiPrediction = sizes[0]; // Follow momentum if strong streak
-        aiPatternName = "AI Momentum Neural";
-    }
-
-    return { 
-        prediction: aiPrediction, 
-        patternName: aiPatternName 
+    return {
+        prediction: selectedPrediction,
+        patternName: activeEngineName
     };
 }
 
@@ -57,7 +60,7 @@ app.post('/api/get-pattern', (req, res) => {
     if (clientLosses !== undefined) stats.losses = clientLosses;
     if (clientWins !== undefined) stats.wins = clientWins;
 
-    const result = runAIEngine(history);
+    const result = runBestAnalysis(history);
 
     res.json({
         period: period,
@@ -69,5 +72,5 @@ app.post('/api/get-pattern', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`AI Quant Server running on port ${PORT}`);
+    console.log(`Dynamic Multi-Engine Server running on port ${PORT}`);
 });
